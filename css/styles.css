@@ -195,6 +195,7 @@ hr {
   }
   
   .players {
+    justify-content: center;
     display: flex;
     flex-wrap: wrap;
     gap: 15px;
@@ -345,4 +346,5 @@ hr {
       opacity: 1;
       transform: translateY(0);
     }
+
 }
