@@ -283,8 +283,11 @@ hr {
     border: 3px solid #0026fd;
     border-radius: 15px;
     box-shadow: 3px 3px 4px black;
-    display: inline-block;
     margin: 5px 10px;
+    justify-content: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
 }
 
 .ytimg {
@@ -346,5 +349,4 @@ hr {
       opacity: 1;
       transform: translateY(0);
     }
-
 }
