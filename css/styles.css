@@ -304,6 +304,14 @@ hr {
     display: inline-block;
 }
 
+.form-box { background: #fff; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
+input, textarea { width: 100%; padding: 8px; margin: 5px 0; border-radius: 5px; border: 1px solid #ccc; }
+button { padding: 10px 15px; border: none; background: #007bff; color: white; border-radius: 5px; cursor: pointer; }
+button:hover { background: #0056b3; }
+.review { border-bottom: 1px solid #ccc; padding: 5px 0; display: flex; align-items: center; }
+.review img { width: 40px; height: 40px; border-radius: 50%; margin-right: 10px; object-fit: cover; }
+.delete-btn { background: red; margin-left: auto; }
+
 
 
 @media (max-width: 1045px) {

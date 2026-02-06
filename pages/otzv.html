@@ -7,17 +7,6 @@
 <link rel="stylesheet" href="../css/styles.css">
 <link rel="icon" type="image/png" href="../images/BreakLeam.jpg">
 <title>BreakLeam / Отзывы</title>
-<style>
-body { font-family: Arial, sans-serif; padding: 20px; background: #f0f0f0;  }
-.container { max-width: 600px; margin: auto; }
-.form-box { background: #fff; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
-input, textarea { width: 100%; padding: 8px; margin: 5px 0; border-radius: 5px; border: 1px solid #ccc; }
-button { padding: 10px 15px; border: none; background: #007bff; color: white; border-radius: 5px; cursor: pointer; }
-button:hover { background: #0056b3; }
-.review { border-bottom: 1px solid #ccc; padding: 5px 0; display: flex; align-items: center; }
-.review img { width: 40px; height: 40px; border-radius: 50%; margin-right: 10px; object-fit: cover; }
-.delete-btn { background: red; margin-left: auto; }
-</style>
 </head>
 <body>
 
@@ -62,8 +51,21 @@ button:hover { background: #0056b3; }
 <div id="reviewBox" class="form-box" style="display:none;">
 <h2>Привет, <span id="userDisplay"></span> <img id="userAvatar" src="" width="40" style="border-radius:50%; vertical-align:middle;"></h2>
 <button onclick="logoutUser()">Выйти</button><br><br>
+<button type="button" onclick="toggleMail()">Письма</button>
+
 <textarea id="reviewInput" placeholder="Ваш отзыв"></textarea>
 <button onclick="addReview()">Отправить отзыв</button>
+<div id="mailBox" style="display:none; margin-top:15px;">
+    <h3>Письма от администраторов</h3>
+    
+    <div id="mailList"></div>
+    
+    <div id="adminMailForm" style="margin-top:10px;">
+        <input type="text" id="mailTo" placeholder="Кому (имя пользователя)">
+        <textarea id="mailInput" placeholder="Текст сообщения"></textarea>
+        <button onclick="sendMail()">Отправить письмо</button>
+        </div>
+    </div>    
 </div>
 
 <h2>Отзывы</h2>
@@ -262,6 +264,103 @@ function showReviews(){
 
 // ---- 13. Автоматически показываем форму, если пользователь уже вошёл ----
 if(currentUser) showReviewBox();
+
+function toggleMail(){
+    const box = document.getElementById("mailBox");
+    box.style.display = box.style.display === "none" ? "block" : "none";
+    showMail();
+}
+
+function sendMail(){
+    if(currentUser.role !== "admin") return;
+
+    let to = document.getElementById("mailTo").value.trim();
+    let text = document.getElementById("mailInput").value.trim();
+
+    if(!to || !text) return alert("Заполни текст и получателя");
+
+    if(!users.some(u => u.name === to)) return alert("Такого пользователя нет");
+
+    let mails = JSON.parse(localStorage.getItem("mails") || "[]");
+
+    mails.push({
+        id: Date.now(),
+        from: currentUser.name,
+        to: to,
+        text: text
+    });
+
+    localStorage.setItem("mails", JSON.stringify(mails));
+
+    document.getElementById("mailTo").value = "";
+    document.getElementById("mailInput").value = "";
+
+    showMail();
+}
+
+function showMail(){
+    const mails = JSON.parse(localStorage.getItem("mails") || "[]");
+    const list = document.getElementById("mailList");
+
+    let visible = [];
+
+    if(currentUser.role === "admin"){
+        visible = mails; // админы видят все письма
+    } else {
+        visible = mails.filter(m => m.to === currentUser.name); // пользователи только свои
+    }
+
+    list.innerHTML = ""; // очищаем перед отрисовкой
+
+    if(visible.length === 0){
+        list.innerHTML = "<p>Писем нет</p>";
+        return;
+    }
+
+    for(let m of visible){
+        const div = document.createElement("div");
+        div.style.background = "#eee";
+        div.style.padding = "8px";
+        div.style.marginBottom = "6px";
+        div.style.borderRadius = "6px";
+
+        // кнопка удалить только если админ и отправитель письма — текущий админ
+        let deleteBtn = "";
+        if(currentUser.role === "admin" && m.from === currentUser.name){
+            deleteBtn = document.createElement("button");
+            deleteBtn.textContent = "Удалить";
+            deleteBtn.style.background = "red";
+            deleteBtn.style.color = "white";
+            deleteBtn.style.marginLeft = "10px";
+            deleteBtn.onclick = () => deleteMail(m.id);
+            div.appendChild(deleteBtn);
+        }
+
+        // содержимое письма
+        const content = document.createElement("div");
+        content.innerHTML = `<b>${m.from} → ${m.to}</b><br>${m.text}`;
+        div.insertBefore(content, div.firstChild);
+
+        list.appendChild(div);
+    }
+
+    // форма отправки письма только для админов
+    document.getElementById("adminMailForm").style.display =
+        currentUser.role === "admin" ? "block" : "none";
+}
+
+
+function deleteMail(id){
+    let mails = JSON.parse(localStorage.getItem("mails") || "[]");
+
+    // оставляем только письма, где id не совпадает или письмо отправлено другим админом
+    mails = mails.filter(m => m.id !== id || m.from !== currentUser.name);
+
+    localStorage.setItem("mails", JSON.stringify(mails));
+    showMail();
+}
+
+
 </script>
 
 </div>
