@@ -217,12 +217,15 @@ function changeAvatar(){
     input.click();
 }
 
-// ---- 10. Добавление отзыва с анти-токсиком ----
+// ---- 10. Добавление отзыва
+// Добавление отзыва
+// Пример текущего пользователя (в реальном проекте меняется при входе)
+
 // Добавление отзыва
 function addReview() {
     const input = document.getElementById("reviewInput");
     let text = input.value.trim();
-    if (!text) return;
+    if(!text) return;
 
     const review = {
         id: Date.now(),
@@ -244,7 +247,7 @@ function addReview() {
 
 // Показ отзывов
 function showReviews() {
-    const reviews = JSON.parse(localStorage.getItem("reviews") || "[]");
+    let reviews = JSON.parse(localStorage.getItem("reviews") || "[]");
     const div = document.getElementById("reviewsList");
     div.innerHTML = "";
 
@@ -254,17 +257,14 @@ function showReviews() {
     }
 
     reviews.forEach(r=>{
-        const canDelete = r.name === currentUser.name || (currentUser.role==="admin" && r.role==="user");
+        const canDelete = r.name===currentUser.name || (currentUser.role==="admin" && r.role==="user");
         const liked = r.likes.includes(currentUser.name);
         const disliked = r.dislikes.includes(currentUser.name);
 
         const reviewDiv = document.createElement("div");
-        reviewDiv.style.border="1px solid #ccc";
-        reviewDiv.style.padding="6px";
-        reviewDiv.style.marginBottom="6px";
-        reviewDiv.style.borderRadius="6px";
+        reviewDiv.className = "review";
         reviewDiv.innerHTML = `
-            <img src="${r.avatar}" style="width:40px;height:40px;border-radius:50%;vertical-align:middle;margin-right:6px;">
+            <img src="${r.avatar}">
             <b>${r.name}:</b> ${r.text}<br>
             <button onclick="toggleLike(${r.id}, 'like')" style="background:${liked?'#8f8':'#eee'}">👍 ${r.likes.length}</button>
             <button onclick="toggleLike(${r.id}, 'dislike')" style="background:${disliked?'#f88':'#eee'}">👎 ${r.dislikes.length}</button>
@@ -274,7 +274,6 @@ function showReviews() {
             delBtn.textContent = "Удалить";
             delBtn.style.background="red";
             delBtn.style.color="white";
-            delBtn.style.marginLeft="10px";
             delBtn.onclick = ()=>deleteReview(r.id);
             reviewDiv.appendChild(delBtn);
         }
@@ -282,11 +281,11 @@ function showReviews() {
     });
 }
 
-// Лайки/дизлайки
+// Лайки и дизлайки
 function toggleLike(id,type){
     let reviews = JSON.parse(localStorage.getItem("reviews") || "[]");
     for(let r of reviews){
-        if(r.id === id){
+        if(r.id===id){
             if(type==="like"){
                 r.dislikes = r.dislikes.filter(u=>u!==currentUser.name);
                 if(r.likes.includes(currentUser.name)) r.likes = r.likes.filter(u=>u!==currentUser.name);
@@ -306,12 +305,12 @@ function toggleLike(id,type){
 // Удаление
 function deleteReview(id){
     let reviews = JSON.parse(localStorage.getItem("reviews") || "[]");
-    reviews = reviews.filter(r => !(r.id===id && (r.name===currentUser.name || (currentUser.role==="admin" && r.role==="user"))));
+    reviews = reviews.filter(r=>!(r.id===id && (r.name===currentUser.name || (currentUser.role==="admin" && r.role==="user"))));
     localStorage.setItem("reviews", JSON.stringify(reviews));
     showReviews();
 }
 
-// Загрузка отзывов при старте
+// Загружаем отзывы при старте
 window.onload = showReviews;
 
 // при загрузке страницы
